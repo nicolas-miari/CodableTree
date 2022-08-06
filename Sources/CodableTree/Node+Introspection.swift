@@ -10,6 +10,10 @@ import Foundation
 // MARK: - Node Introspection
 
 extension Node {
+
+  /**
+   Returns `true` if the node is of **leaf** type.
+   */
   public var isLeaf: Bool {
     switch nodeType {
     case .leaf:
@@ -19,6 +23,9 @@ extension Node {
     }
   }
 
+  /**
+   Returns `true` if the node is of **branch** type.
+   */
   public var isBranch: Bool {
     switch nodeType {
     case .branch:

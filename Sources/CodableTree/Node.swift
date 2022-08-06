@@ -16,16 +16,22 @@ public class Node: Codable {
 
   /**
    The name of the node, for display purposes.
+
+   Although this is a user-defined value does not affect the structure of a tree, nodes with
+   different names will always compare as unequal.
    */
   public var name: String
 
   /**
    The parent node in the tree hierarchy (the parent is always a branch type node).
+
+   This value is ignored when comparing nodes (to avoid infinite recursion).
    */
   public internal(set) var parent: Node?
 
   /**
-   The type of node (branch or leaf), and its contents.
+   Specified the type of node (branch or leaf), and provides access to its contents (children or
+   payload, respectively).
    */
   internal var nodeType: NodeType
 
@@ -71,6 +77,8 @@ public class Node: Codable {
     self.name = name
     self.nodeType = .leaf(payload: payload)
   }
+
+  // MARK: - Coding Support
 
   private enum CodingKeys: String, CodingKey {
     case name

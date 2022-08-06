@@ -26,6 +26,9 @@ extension Node {
     try insertChild(subfolder, at: first)
   }
 
+  /**
+   Removes self from parent and inserts own children starting at own original index.
+   */
   public func splitGroup() throws {
     guard isBranch else {
       throw NodeError.invalidOperation(detail: "Cannot split leaf node.")
