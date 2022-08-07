@@ -5,12 +5,10 @@ import Foundation
 /**
  Represents either a branch or a leaf node in a file system-like tree hierarchy.
 
- Nodes can either be of branch (folder) or leaf (file) type. The branch type nodes can contain other
- nodes as children, but the leaf nodes instead store an associated string value. The meaning of this
- string value is client-specific, but one possible use is to store a unique object ID, and have a
- separate "object provider" component that maps the IDs to the actual instances of the objects
- represented in the hierarchy. This design makes the node implementation "payload agnostic", and
- therefore makes serialization (conformance to Codable) of a whole node tree possible.
+ Nodes can either be of branch (folder) or leaf (file) type. The branch type nodes can contain other nodes as children, but the leaf nodes instead store an associated string value. The meaning of this string value is client-specific, but one possible use is to store a unique object ID, and have a separate "object provider" component that maps the
+ IDs to the actual instances of the objects represented in the hierarchy. This design makes
+ the node implementation "payload agnostic", and therefore makes serialization (conformance
+ to `Codable`) of a whole node tree possible.
  */
 public class Node: Codable {
 
@@ -42,10 +40,13 @@ public class Node: Codable {
     /**
      Node type of a **leaf** node. The associated value is the payload string.
 
-     To decouple the Node implementation from any specific contained type and make encoding easier,
-     the payload is a String instead of an object of some parameterized type. The client code would
-     typically store some sort of custom object identifier in this string, and use a separate object
-     provider to retrieve the actual object represented by the node on demand.
+     To make conformance to `Codable` possible, the node implementation is not tied to any
+     represented object type (concrete or generic). Instead, a custom `payload` string
+     property is provided.
+     A tree representing a  hierarchy of strings can use the property it as-is; a tree
+     represeting a hierarchy of more complex objects can use the property as an "object
+     identifier", and rely on a separate "object provider" component to supply the actual
+     object instances on demand.
      */
     case leaf(payload: String)
 
