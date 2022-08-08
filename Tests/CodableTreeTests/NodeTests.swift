@@ -255,6 +255,36 @@ final class NodeTests: XCTestCase {
     XCTAssertEqual(parent2.children[dstIndex], children1[srcIndex])
   }
 
+  func testIsDescendantInChain() {
+    // GIVEN:
+    let child = Node(name: "Child", payload: "")
+    let parent = Node(name: "Parent", children: [child])
+    let root = Node(name: "Root", children: [parent])
+
+    // THEN:
+    XCTAssertTrue(child.isDescendant(of: parent))
+    XCTAssertTrue(parent.isDescendant(of: root))
+    XCTAssertTrue(child.isDescendant(of: root))
+    XCTAssertFalse(child.isDescendant(of: child))  // not descendant of self
+    XCTAssertFalse(parent.isDescendant(of: child)) // nor descendant of direct child
+    XCTAssertFalse(root.isDescendant(of: child))   // not descendant of distant descendant
+  }
+
+  func testIndexInParent() {
+    // GIVEN:
+    let child0 = Node(name: "Child 0")
+    let child1 = Node(name: "Child 1")
+    let child2 = Node(name: "Child 2")
+    let parent = Node(name: "Parent", children: [child0, child1, child2])
+
+    // THEN:
+    XCTAssertEqual(child0.indexInParent, 0)
+    XCTAssertEqual(child1.indexInParent, 1)
+    XCTAssertEqual(child2.indexInParent, 2)
+    XCTAssertNil(parent.indexInParent)
+  }
+  
+
   // MARK: - Grouping
 
   func testGroupChlidren() throws {
