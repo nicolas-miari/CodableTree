@@ -9,11 +9,11 @@ final class NodeTests: XCTestCase {
 
     // GIVEN:
     let node = Node(name: "Root")
-    try node.addChild(Node(name: "Child 1", payload: "123456"))
-    try node.addChild(Node(name: "Child 2", payload: "789012"))
-    let subfolder = Node(name: "Subfolder 1")
-    try subfolder.addChild(Node(name: "Child 3", payload: "456789"))
-    try node.addChild(subfolder)
+     node.addChild(Node(name: "Child 1", value: "123456"))
+     node.addChild(Node(name: "Child 2", value: "789012"))
+     let subfolder = Node(name: "Subfolder 1")
+     subfolder.addChild(Node(name: "Child 3", value: "456789"))
+     node.addChild(subfolder)
 
     // WHEN:
     let data = try JSONEncoder().encode(node)
@@ -27,8 +27,8 @@ final class NodeTests: XCTestCase {
 
   func testDifferentNamesAreUnequal() {
     // GIVEN:
-    let node1 = Node(name: "Node 1", payload: "12345")
-    let node2 = Node(name: "Node 2", payload: "12345")
+    let node1 = Node(name: "Node 1", value: "12345")
+    let node2 = Node(name: "Node 2", value: "12345")
 
     // THEN:
     XCTAssertNotEqual(node1, node2)
@@ -36,8 +36,8 @@ final class NodeTests: XCTestCase {
 
   func testDifferentPayloadsAreUnequal() {
     // GIVEN:
-    let node1 = Node(name: "Node 1", payload: "12345")
-    let node2 = Node(name: "Node 1", payload: "67890")
+    let node1 = Node(name: "Node 1", value: "12345")
+    let node2 = Node(name: "Node 1", value: "67890")
 
     // THEN:
     XCTAssertNotEqual(node1, node2)
@@ -45,7 +45,7 @@ final class NodeTests: XCTestCase {
 
   func testDifferentTypesAreUnequal() {
     // GIVEN:
-    let node1 = Node(name: "Node", payload: "123456")
+    let node1 = Node(name: "Node", value: "123456")
     let node2 = Node(name: "Node")
 
     // THEN:
@@ -54,10 +54,10 @@ final class NodeTests: XCTestCase {
 
   func testDifferentNumberOfChildrenAreUnequal() {
     // GIVEN:
-    let child1 = Node(name: "Child 1", payload: "12345")
+    let child1 = Node(name: "Child 1", value: "12345")
     let folder1 = Node(name: "Folder", children: [child1])
-    let child2 = Node(name: "Child 2", payload: "67890")
-    let child3 = Node(name: "Child 3", payload: "10111")
+    let child2 = Node(name: "Child 2", value: "67890")
+    let child3 = Node(name: "Child 3", value: "10111")
     let folder2 = Node(name: "Folder", children: [child2, child3])
 
     // THEN:
@@ -66,9 +66,9 @@ final class NodeTests: XCTestCase {
 
   func testSameNumberOfChildrenButDifferentChildrenAreUnequal() {
     // GIVEN:
-    let child1 = Node(name: "Child 1", payload: "12345")
+    let child1 = Node(name: "Child 1", value: "12345")
     let folder1 = Node(name: "Folder", children: [child1])
-    let child2 = Node(name: "Child 2", payload: "67890")
+    let child2 = Node(name: "Child 2", value: "67890")
     let folder2 = Node(name: "Folder", children: [child2])
 
     // THEN:
@@ -78,43 +78,31 @@ final class NodeTests: XCTestCase {
   func testGetPayload() throws {
     // GIVEN:
     let payload = "123456"
-    let node = Node(name: "Node 1", payload: payload)
+    let node = Node(name: "Node 1", value: payload)
     let folder = Node(name: "Folder 1")
 
     // THEN:
-    XCTAssertEqual(node.payload, payload)
-    XCTAssertNil(folder.payload)
+    XCTAssertEqual(node.value, payload)
+    XCTAssertNil(folder.value)
   }
 
   func testSetPayload() throws {
     // GIVEN:
     let payload = "123456"
-    let node = Node(name: "Node 1", payload: payload)
+    let node = Node(name: "Node 1", value: payload)
 
     // WHEN:
     let newPayload = "7890"
-    node.payload = newPayload
+    node.value = newPayload
 
     // THEN:
-    XCTAssertEqual(node.payload, newPayload)
-  }
-
-  func testIntrospection() throws {
-    // GIVEN:
-    let node = Node(name: "Node 1", payload: "123456")
-    let folder = Node(name: "Folder 1", children: [node])
-
-    // THEN:
-    XCTAssertTrue(node.isLeaf)
-    XCTAssertFalse(node.isBranch)
-    XCTAssertTrue(folder.isBranch)
-    XCTAssertFalse(folder.isLeaf)
+    XCTAssertEqual(node.value, newPayload)
   }
 
   func testChildren() throws {
     // GIVEN:
     let payload = "123456"
-    let node = Node(name: "Node 1", payload: payload)
+    let node = Node(name: "Node 1", value: payload)
     let folder = Node(name: "Folder 1", children: [node])
 
     XCTAssertEqual(node.children.count, 0)
@@ -126,23 +114,14 @@ final class NodeTests: XCTestCase {
   func testAddChild() throws {
     // GIVEN:
     let node = Node(name: "Root")
-    let child0 = Node(name: "Child 0", payload: "123456")
-    let child1 = Node(name: "Child 1", payload: "789101")
-    try node.addChild(child0)
-    try node.addChild(child1)
+    let child0 = Node(name: "Child 0", value: "123456")
+    let child1 = Node(name: "Child 1", value: "789101")
+     node.addChild(child0)
+     node.addChild(child1)
 
     // THEN
     XCTAssertEqual(node.children[0], child0)
     XCTAssertEqual(node.children[1], child1)
-  }
-
-  func testAddchildToLeafThrows() throws {
-    // WHEN:
-    let child0 = Node(name: "Child 0", payload: "123456")
-    let child1 = Node(name: "Child 1", payload: "789101")
-
-    // THEN:
-    XCTAssertThrowsError(try child0.addChild(child1))
   }
 
   func testRemoveChild() throws {
@@ -151,19 +130,11 @@ final class NodeTests: XCTestCase {
     let parent = Node(name: "Parent", children: [node])
 
     // WHEN:
-    try parent.removeChild(at: 0)
+    parent.removeChild(at: 0)
 
     // THEN:
     XCTAssertNil(node.parent)
     XCTAssertEqual(parent.children.count, 0)
-  }
-
-  func testRemoveChildFromLeafThrows() throws {
-    // WHEN:
-    let node = Node(name: "Node", payload: "12345")
-
-    // THEN:
-    XCTAssertThrowsError(try node.removeChild(at: 0))
   }
 
   func testRemoveFromParent() throws {
@@ -193,39 +164,31 @@ final class NodeTests: XCTestCase {
   func testSwapChldren() throws {
     // GIVEN:
     let children = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent = Node(name: "Parent", children: children)
 
     // WHEN:
     let index1 = 3
     let index2 = 7
-    try parent.swapChildren(at: index1, and: index2)
+    parent.swapChildren(at: index1, and: index2)
 
     // THEN:
     XCTAssertEqual(parent.children[index1].name, "\(index2)")
     XCTAssertEqual(parent.children[index2].name, "\(index1)")
   }
 
-  func testSwapChildrenOnLeafNodeThrows() throws {
-    // WHEN:
-    let node = Node(name: "Node", payload: "12345")
-
-    // THEN:
-    XCTAssertThrowsError(try node.swapChildren(at: 0, and: 1))
-  }
-
   func testTransplantWithinSameParent() throws {
     // GIVEN:
     let children = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent = Node(name: "Parent", children: children)
 
     // WHEN:
     let index1 = 3
     let index2 = 7
-    try Node.moveNode(at: index1, of: parent, to: index2, of: parent)
+    Node.moveNode(at: index1, of: parent, to: index2, of: parent)
 
     // THEN:
     XCTAssertEqual(parent.children[index1], children[index2])
@@ -235,12 +198,12 @@ final class NodeTests: XCTestCase {
   func testTransplantChild() throws {
     // GIVEN:
     let children1 = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent1 = Node(name: "Parent 1", children: children1)
 
     let children2 = (0 ... 20).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent2 = Node(name: "Parent 2", children: children2)
 
@@ -257,7 +220,7 @@ final class NodeTests: XCTestCase {
 
   func testIsDescendantInChain() {
     // GIVEN:
-    let child = Node(name: "Child", payload: "")
+    let child = Node(name: "Child", value: "")
     let parent = Node(name: "Parent", children: [child])
     let root = Node(name: "Root", children: [parent])
 
@@ -290,7 +253,7 @@ final class NodeTests: XCTestCase {
   func testGroupChlidren() throws {
     // GIVEN:
     let children = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent = Node(name: "Parent", children: children)
 
@@ -299,21 +262,20 @@ final class NodeTests: XCTestCase {
     try parent.groupChildren(at: indices, name: "Subfolder")
 
     // THEN:
-    XCTAssertEqual(parent.children[0].payload, "0")
-    XCTAssertEqual(parent.children[1].payload, "1")
-    XCTAssertTrue(parent.children[2].isBranch) // Subfolder containing 2, 3, and 5
-    XCTAssertEqual(parent.children[3].payload, "4")
-    XCTAssertEqual(parent.children[4].payload, "6")
-    XCTAssertEqual(parent.children[5].payload, "7")
-    XCTAssertEqual(parent.children[6].payload, "8")
-    XCTAssertEqual(parent.children[7].payload, "9")
-    XCTAssertEqual(parent.children[8].payload, "10")
+    XCTAssertEqual(parent.children[0].value, "0")
+    XCTAssertEqual(parent.children[1].value, "1")
+    XCTAssertEqual(parent.children[3].value, "4")
+    XCTAssertEqual(parent.children[4].value, "6")
+    XCTAssertEqual(parent.children[5].value, "7")
+    XCTAssertEqual(parent.children[6].value, "8")
+    XCTAssertEqual(parent.children[7].value, "9")
+    XCTAssertEqual(parent.children[8].value, "10")
   }
 
   func testGroupEmptyChildrenFailsSilently() throws {
     // GIVEN:
     let children = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent = Node(name: "Parent", children: children)
 
@@ -326,39 +288,36 @@ final class NodeTests: XCTestCase {
 
   func testSplitLeafThrows() throws {
     // GIVEN:
-    let node = Node(name: "Node", payload: "12345")
+    let node = Node(name: "Node", value: "12345")
 
     // THEN:
     XCTAssertThrowsError(try node.splitGroup())
   }
 
-  func testSplitOrphanIsNoop() throws {
+  func testSplitOrphanThrows() throws {
     // GIVEN:
     let children = (0 ... 10).map { (index) -> Node in
-      return Node(name: "\(index)", payload: "\(index)")
+      return Node(name: "\(index)", value: "\(index)")
     }
     let parent = Node(name: "Parent", children: children)
 
-    // WHEN:
-    try parent.splitGroup()
-
     // THEN:
-    XCTAssertEqual(parent.children, children)
+    XCTAssertThrowsError(try parent.splitGroup())
   }
 
   func testSplitSubfolder() throws {
     // GIVEN:
     let parent = Node(name: "Parent", children: [
-      Node(name: "0", payload: "0"),
-      Node(name: "1", payload: "1"),
-      Node(name: "2", payload: "2"),
+      Node(name: "0", value: "0"),
+      Node(name: "1", value: "1"),
+      Node(name: "2", value: "2"),
       Node(name: "Subfolder", children: [
-        Node(name: "3", payload: "3"),
-        Node(name: "4", payload: "4"),
-        Node(name: "5", payload: "5"),
+        Node(name: "3", value: "3"),
+        Node(name: "4", value: "4"),
+        Node(name: "5", value: "5"),
       ]),
-      Node(name: "6", payload: "6"),
-      Node(name: "7", payload: "7"),
+      Node(name: "6", value: "6"),
+      Node(name: "7", value: "7"),
     ])
 
     // WHEN:

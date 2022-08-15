@@ -8,18 +8,17 @@ extension Node: Equatable {
     guard lhs.name == rhs.name else {
       return false
     }
-    switch (lhs.nodeType, rhs.nodeType) {
-    case (.leaf, .branch), (.branch, .leaf):
+    guard lhs.value == rhs.value else {
       return false
-
-    case (.leaf(let leftPayload), .leaf(let rightPayload)):
-      return leftPayload == rightPayload
-
-    case (.branch(let leftChildren), .branch(let rightChildren)):
-      guard leftChildren.count == rightChildren.count else {
-        return false
-      }
-      return leftChildren == rightChildren
     }
+    /**
+     Compare array sizes first, to bail out before performing the more costly member-wise comparison
+     of the full arrays (it is possible that `Foundation.Array where Element: Equatable` already has
+     this optimization in place, but still...)
+     */
+    guard lhs.children.count == rhs.children.count else {
+      return false
+    }
+    return lhs.children == rhs.children
   }
 }

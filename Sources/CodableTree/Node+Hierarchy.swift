@@ -7,33 +7,24 @@ extension Node {
   /**
    (Pretty much what says in the box)
    */
-  public func insertChild(_ child: Node, at index: Int) throws {
-    guard isBranch else {
-      throw NodeError.invalidOperation(detail: "Cannot insert children into a leaf node.")
-    }
+  public func insertChild(_ child: Node, at index: Int) {
     child.removeFromParent()
-
-    var children = self.children
     children.insert(child, at: index)
     child.parent = self
-    self.nodeType = .branch(children: children)
   }
 
   /**
    Same as calling `insertChild(_:at:)` passing the maximum valid index (`self.children.count`).
    */
-  public func addChild(_ child: Node) throws {
-    try insertChild(child, at: children.count)
+  public func addChild(_ child: Node) {
+    insertChild(child, at: children.count)
   }
 
   /**
    Removes the child node at the specified index from the node's children, and returns it.
    */
   @discardableResult
-  public func removeChild(at index: Int) throws -> Node {
-    guard isBranch else {
-      throw NodeError.invalidOperation(detail: "Cannot remove children from a leaf node.")
-    }
+  public func removeChild(at index: Int) -> Node {
     let child = children.remove(at: index)
     child.parent = nil
     return child
@@ -49,16 +40,13 @@ extension Node {
     guard let index = parent.children.firstIndex(where: { $0 === self }) else {
       return
     }
-    _ = try? parent.removeChild(at: index)
+    _ = parent.removeChild(at: index)
   }
 
   /**
    Exchanges the positions of the two child nodes at the specified indices.
    */
-  public func swapChildren(at index1: Int, and index2: Int) throws {
-    guard isBranch else {
-      throw NodeError.invalidOperation(detail: "Cannot swap children in a leaf node.")
-    }
+  public func swapChildren(at index1: Int, and index2: Int) {
     children.swapAt(index1, index2)
   }
 
@@ -68,12 +56,11 @@ extension Node {
    If `srcParent` and `dstParent` are the same, this is equivalent to calling
    `swapChildren(at:and:)` on either parent.
    */
-  public static func moveNode(at srcIndex: Int, of srcParent: Node, to dstIndex: Int, of dstParent: Node) throws {
+  public static func moveNode(at srcIndex: Int, of srcParent: Node, to dstIndex: Int, of dstParent: Node) {
     guard srcParent !== dstParent else {
-      return try srcParent.swapChildren(at: srcIndex, and: dstIndex)
+      return srcParent.swapChildren(at: srcIndex, and: dstIndex)
     }
-
-    let child = try srcParent.removeChild(at: srcIndex)
-    try dstParent.insertChild(child, at: dstIndex)
+    let child = srcParent.removeChild(at: srcIndex)
+    dstParent.insertChild(child, at: dstIndex)
   }
 }

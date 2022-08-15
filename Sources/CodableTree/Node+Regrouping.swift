@@ -21,22 +21,20 @@ extension Node {
       return children[index]
     }
 
-    let subfolder = Node(name: name, children: selectChildren)
-
-    try insertChild(subfolder, at: first)
+    let subfolder = Node(name: name, value: nil)
+    selectChildren.reversed().forEach {
+      subfolder.insertChild($0, at: 0)
+    }
+    insertChild(subfolder, at: first)
   }
 
   /**
    Removes self from parent and inserts own children starting at own original index.
    */
   public func splitGroup() throws {
-    guard isBranch else {
-      throw NodeError.invalidOperation(detail: "Cannot split leaf node.")
-    }
-
     // We need our own index within out parent to insert all of our children there.
     guard let parent = parent, let index = parent.children.firstIndex(of: self) else {
-      return
+      throw NodeError.invalidOperation(detail: "Cannot split orphaned node.")
     }
 
     // Remove self:
@@ -44,8 +42,8 @@ extension Node {
 
     // Insert all children back to front at the same index, to rpeserve the orginal order within
     // self
-    try children.reversed().forEach {
-      try parent.insertChild($0, at: index)
+    children.reversed().forEach {
+      parent.insertChild($0, at: index)
     }
 
 

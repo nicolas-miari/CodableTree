@@ -13,94 +13,63 @@ import Foundation
 public class Node: Codable {
 
   /**
-   The name of the node, for display purposes.
-
-   Although this is a user-defined value does not affect the structure of a tree, nodes with
-   different names will always compare as unequal.
+   A custom, user-defined string for visual identification purposes.
    */
   public var name: String
 
   /**
-   The parent node in the tree hierarchy (the parent is always a branch type node).
+   A string used to identify the hierarchical object represented by the node. The mapping between
+   this value and the represented object is client-defined.
 
-   This value is ignored when comparing nodes (to avoid infinite recursion).
+   This property is optional to allow for "pure container" nodes such as folders in a file system.
+   */
+  public var value: String?
+
+  /**
+   The parent node in the tree hierarchy. This value is ignored when comparing nodes (to avoid
+   infinite recursion). Read-only (use insert/remove API to modify tree).
    */
   public internal(set) var parent: Node?
 
   /**
-   Specified the type of node (branch or leaf), and provides access to its contents (children or
-   payload, respectively).
-   */
-  internal var nodeType: NodeType
+   The child nodes in the hierarchy. This value is skipped when encoding the node if the array is
+   empty, to save space. Read-only (use insert/remove API to modify tree).
+    */
+  public internal(set) var children: [Node]
 
   /**
-   Constants specifying the two possible types of nodes in a tree.
+   Creates a new node.
    */
-  internal enum NodeType {
-    /**
-     Node type of a **leaf** node. The associated value is the payload string.
-
-     To make conformance to `Codable` possible, the node implementation is not tied to any
-     represented object type (concrete or generic). Instead, a custom `payload` string
-     property is provided.
-     A tree representing a  hierarchy of strings can use the property it as-is; a tree
-     represeting a hierarchy of more complex objects can use the property as an "object
-     identifier", and rely on a separate "object provider" component to supply the actual
-     object instances on demand.
-     */
-    case leaf(payload: String)
-
-    /**
-     Node type of a **branch** node. The associated type is an array of child nodes, each of which
-     can be either leaf or branch.
-     */
-    case branch(children: [Node])
-  }
-
-  /**
-   Creates a **branch** node with the specified name and child nodes.
-
-   The child nodes are first removed from their previous parent.
-   */
-  public init(name: String, children: [Node] = []) {
+  public init(name: String = "", value: String? = nil, children: [Node] = []) {
+    self.value = value
     self.name = name
-    self.nodeType = .branch(children: children)
+    self.children = children
     children.forEach {
       $0.removeFromParent()
       $0.parent = self
     }
   }
 
-  /**
-   Creates a **leaf** node with the specified name and payload (value).
-   */
-  public init(name: String, payload: String) {
-    self.name = name
-    self.nodeType = .leaf(payload: payload)
-  }
-
   // MARK: - Coding Support
 
   private enum CodingKeys: String, CodingKey {
     case name
-    case content
+    case value
+    case children
   }
 
   public required init(from decoder: Decoder) throws {
     let values = try decoder.container(keyedBy: CodingKeys.self)
-    name = try values.decode(String.self, forKey: .name)
 
-    do {
-      // First, assume the node is of branch type and attempt to decode its children...
-      let children = try values.decode([Node].self, forKey: .content)
-      nodeType = .branch(children: children)
+    self.value = try values.decodeIfPresent(String.self, forKey: .value)
+    self.name = try values.decode(String.self, forKey: .name)
+
+    // Children array is skipped from the JSON if empty, to save space.
+    if let children = try values.decodeIfPresent([Node].self, forKey: .children) {
+      self.children = children
       children.forEach { $0.parent = self }
-
-    } catch {
-      // ...if that fails, assume it's a leaf instead, and attempt to decode its payload. If that
-      // too fails, assume corrupted data and throw the error forward.
-      let payload = try values.decode(String.self, forKey: .content)
-      nodeType = .leaf(payload: payload)
+    } else {
+      self.children = []
     }
   }
 
@@ -108,11 +77,12 @@ public class Node: Codable {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(name, forKey: .name)
 
-    switch nodeType {
-    case .leaf(let payload):
-      try container.encode(payload, forKey: .content)
-    case .branch(let children):
-      try container.encode(children, forKey: .content)
+    if let value = value {
+      try container.encode(value, forKey: .value)
+    }
+    // Children array is skipped from the JSON if empty, to save space.
+    if children.count > 0 {
+      try container.encode(children, forKey: .children)
     }
   }
 }
